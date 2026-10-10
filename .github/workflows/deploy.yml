@@ -29,16 +29,28 @@ jobs:
         run: bun run build
 
       - name: Verify static output
+        id: verify
         run: |
-          test -f dist/client/index.html || { echo "index.html missing"; exit 1; }
-          grep -qa "أكاديمية علو الهمة" dist/client/index.html || { echo "content missing"; exit 1; }
-          test -f dist/client/CNAME || { echo "CNAME missing"; exit 1; }
+          # Detect the static output dir: nitro presets differ between environments
+          # (cloudflare-module -> dist/client, static/node -> .output/public).
+          for dir in dist/client .output/public dist .output; do
+            if [ -f "$dir/index.html" ]; then OUT="$dir"; break; fi
+          done
+          if [ -z "$OUT" ]; then
+            echo "No prerendered index.html found. Build output:"
+            ls -R dist .output 2>/dev/null | head -50
+            exit 1
+          fi
+          grep -qa "أكاديمية علو الهمة" "$OUT/index.html" || { echo "content missing in $OUT/index.html"; exit 1; }
+          test -f "$OUT/CNAME" || { echo "CNAME missing in $OUT"; exit 1; }
+          echo "Static output verified in: $OUT"
+          echo "out_dir=$OUT" >> "$GITHUB_OUTPUT"
 
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist/client
+          path: ${{ steps.verify.outputs.out_dir }}
 
   deploy:
     needs: build
