@@ -13,3 +13,4 @@
 - Keep public package data and email request-link generation in a shared browser-safe module, so displayed offers and their tests use the same values.
 - Subscription requests use email links, not stored forms or live payments, because this page is informational and the supplied contact channel is email.
 - Define visual roles and responsive section styles in the global design system, so presentation remains consistent across the Arabic page.
+- The site deploys as a fully static build: `/` is prerendered in vite.config.ts (autoStaticPathsDiscovery off) and `.github/workflows/deploy.yml` publishes `dist/client` to GitHub Pages, because the page has no runtime server needs and is hosted on a static host with a custom domain.
