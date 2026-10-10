@@ -30,14 +30,15 @@ jobs:
 
       - name: Verify static output
         run: |
-          test -f .output/public/index.html || { echo "index.html missing"; exit 1; }
-          grep -q "أكاديمية علو الهمة" .output/public/index.html || { echo "content missing"; exit 1; }
+          test -f dist/client/index.html || { echo "index.html missing"; exit 1; }
+          grep -qa "أكاديمية علو الهمة" dist/client/index.html || { echo "content missing"; exit 1; }
+          test -f dist/client/CNAME || { echo "CNAME missing"; exit 1; }
 
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .output/public
+          path: dist/client
 
   deploy:
     needs: build
